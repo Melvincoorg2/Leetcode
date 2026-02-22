@@ -1,27 +1,30 @@
-def evalRPN(self, tokens):
+from typing import List
 
+class Solution:
+    def exclusiveTime(self, n: int, logs: List[str]) -> List[int]:
+
+        result = [0] * n
         stack = []
+        prev_time = 0
 
-        for token in tokens:
+        for log in logs:
 
-            if token in ["+", "-", "*", "/"]:
+            fn_id, status, time = log.split(":")
+            fn_id = int(fn_id)
+            time = int(time)
 
-                b = stack.pop()
-                a = stack.pop()
+            if status == "start":
 
-                if token == "+":
-                    stack.append(a + b)
+                if stack:
+                    # Add time to currently running function
+                    result[stack[-1]] += time - prev_time
 
-                elif token == "-":
-                    stack.append(a - b)
+                stack.append(fn_id)
+                prev_time = time
 
-                elif token == "*":
-                    stack.append(a * b)
+            else:  # "end"
 
-                else:  # "/"
-                    stack.append(int(a / b))   # truncate toward zero
+                result[stack.pop()] += time - prev_time + 1
+                prev_time = time + 1
 
-            else:
-                stack.append(int(token))
-
-        return stack[0]
+        return result
