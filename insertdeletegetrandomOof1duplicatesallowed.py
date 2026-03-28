@@ -4,8 +4,8 @@ from collections import defaultdict
 class RandomizedCollection:
 
     def __init__(self):
-        self.vals = []                      # list of (val, index_in_set)
-        self.idx = defaultdict(set)         # val -> set of indices in vals
+        self.vals = []
+        self.idx = defaultdict(set)
 
     def insert(self, val: int) -> bool:
         absent = len(self.idx[val]) == 0
@@ -16,13 +16,20 @@ class RandomizedCollection:
     def remove(self, val: int) -> bool:
         if not self.idx[val]:
             return False
-        # pick any index of val, swap with last
-        remove_idx = next(iter(self.idx[val]))
-        last_val = self.vals[-1]
 
-        self.vals[remove_idx] = last_val
-        self.idx[last_val].add(remove_idx)
-        self.idx[last_val].discard(len(self.vals) - 1)
+        last_idx = len(self.vals) - 1
+        last_val = self.vals[last_idx]
+
+        # prefer removing an index that isn't last to simplify swap
+        if last_idx in self.idx[val]:
+            remove_idx = last_idx
+        else:
+            remove_idx = next(iter(self.idx[val]))
+
+        if remove_idx != last_idx:
+            self.vals[remove_idx] = last_val
+            self.idx[last_val].add(remove_idx)
+            self.idx[last_val].discard(last_idx)
 
         self.idx[val].discard(remove_idx)
         self.vals.pop()
