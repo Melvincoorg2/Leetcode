@@ -10,18 +10,39 @@ class Solution:
     word_freq = Counter(words)
     result = []
 
-    for i in range(len(s) - total + 1):
-        seen = Counter()
-        j = 0
-        while j < w_count:
-            word = s[i + j * w_len: i + (j+1) * w_len]
-            if word not in word_freq:
-                break
-            seen[word] += 1
-            if seen[word] > word_freq[word]:
-                break
-            j += 1
-        if j == w_count:
-            result.append(i)
+    for start in range(w_len):  # w_len independent windows
+        left = start
+        curr = Counter()
+        matched = 0
+
+        for right in range(start, len(s) - w_len + 1, w_len):
+            word = s[right: right + w_len]
+
+            if word in word_freq:
+                curr[word] += 1
+                if curr[word] <= word_freq[word]:
+                    matched += 1
+
+                # shrink window if over-counted
+                while curr[word] > word_freq[word]:
+                    left_word = s[left: left + w_len]
+                    curr[left_word] -= 1
+                    if curr[left_word] < word_freq[left_word]:
+                        matched -= 1
+                    left += w_len
+
+                if matched == w_count:
+                    result.append(left)
+                    # slide left pointer forward
+                    left_word = s[left: left + w_len]
+                    curr[left_word] -= 1
+                    if curr[left_word] < word_freq[left_word]:
+                        matched -= 1
+                    left += w_len
+            else:
+                # invalid word, reset window
+                curr.clear()
+                matched = 0
+                left = right + w_len
 
     return result
